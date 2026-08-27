@@ -4,9 +4,7 @@ import android.Manifest
 import android.app.role.RoleManager
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Telephony
 import androidx.activity.ComponentActivity
@@ -184,8 +182,16 @@ private fun sendSms(context: Context, address: String, body: String) {
 
 @Composable private fun SearchScreen(query: String, onQueryChange: (String) -> Unit, onClose: () -> Unit, backdrop: Unit) { Column(Modifier.fillMaxSize()) { Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onClose) { Icon(Icons.Default.ArrowBack, null, tint = Color.White) }; Text("Recherche", Color.White, 26.sp, FontWeight.Bold) }; Spacer(Modifier.weight(1f)); SearchBar(query, onQueryChange, onClose = onClose, backdrop = backdrop) } }
 @Composable private fun SearchBar(query: String = "", onQueryChange: ((String) -> Unit)? = null, onSearch: (() -> Unit)? = null, onClose: (() -> Unit)? = null, backdrop: Unit) { Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(18.dp, 14.dp), verticalAlignment = Alignment.CenterVertically) { GlassSurface(Modifier.weight(1f).height(62.dp), backdrop, RoundedCornerShape(34.dp)) { Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = { onSearch?.invoke() }) { Icon(Icons.Default.Search, null, tint = Color.White) }; if (onQueryChange != null) TextField(query, onQueryChange, singleLine = true, placeholder = { Text("Recherche", Color.Gray) }, modifier = Modifier.weight(1f), colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White)) else Text("Recherche", Color.Gray, modifier = Modifier.weight(1f)); Icon(Icons.Default.Mic, null, tint = Color.White) } }; Spacer(Modifier.width(10.dp)); GlassIconButton(if (onClose == null) Icons.Default.Search else Icons.Default.Close, { onClose?.invoke() }, backdrop) } }
-@Composable private fun GlassMenu(modifier: Modifier, title: String?, entries: List<Pair<androidx.compose.ui.graphics.vector.ImageVector, String>>, footer: String?, onDismiss: () -> Unit, backdrop: Unit) { GlassSurface(modifier.width(340.dp), backdrop, RoundedCornerShape(34.dp)) { Column(Modifier.padding(24.dp)) { title?.let { Text(it, Color.White, 20.sp, FontWeight.Bold) }; entries.forEach { (icon, label) -> Row(Modifier.fillMaxWidth().clickable(onClick = onDismiss).padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = Color.White); Spacer(Modifier.width(20.dp)); Text(label, Color.White, 18.sp) } }; footer?.let { Text(it, Color.Gray, 15.sp, Modifier.padding(top = 12.dp)) } } } }
-@Composable private fun GlassSurface(modifier: Modifier, backdrop: Unit, shape: Shape, content: @Composable () -> Unit) { Box(modifier.clip(shape).background(Glass), contentAlignment = Alignment.Center) { content() } }
+@Composable private fun GlassMenu(modifier: Modifier, title: String?, entries: List<Pair<androidx.compose.ui.graphics.vector.ImageVector, String>>, footer: String?, onDismiss: () -> Unit, backdrop: Unit) { GlassSurface(modifier.width(340.dp), backdrop, RoundedCornerShape(34.dp)) { Column(Modifier.padding(24.dp)) { title?.let { Text(it, Color.White, 20.sp, FontWeight.Bold) }; entries.forEach { (icon, label) -> Row(Modifier.fillMaxWidth().clickable(onClick = onDismiss).padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = Color.White); Spacer(Modifier.width(20.dp)); Text(label, Color.White, 18.sp) } }; footer?.let { Text(it, Color.Gray, 15.sp, Modifier.padding(top = 12.dp)) } } } }@Composable
+private fun GlassSurface(modifier: Modifier, backdrop: Unit, shape: Shape, content: @Composable () -> Unit) {
+    Box(
+        modifier.clip(shape).background(
+            Brush.linearGradient(listOf(Color.White.copy(alpha = .16f), Glass, Color.Black.copy(alpha = .45f)))
+        ),
+        contentAlignment = Alignment.Center
+    ) { content() }
+}
+
 @Composable private fun GlassButton(text: String, onClick: () -> Unit, backdrop: Unit) { GlassSurface(Modifier.clip(RoundedCornerShape(28.dp)).clickable(onClick = onClick).padding(horizontal = 22.dp, vertical = 14.dp), backdrop, RoundedCornerShape(28.dp)) { Text(text, Color.White, 19.sp, FontWeight.Bold) } }
 @Composable private fun GlassIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit, backdrop: Unit) { GlassSurface(Modifier.size(64.dp).clip(CircleShape).clickable(onClick = onClick), backdrop, CircleShape) { Icon(icon, null, tint = Color.White, modifier = Modifier.size(30.dp)) } }
 @Composable private fun Avatar(initial: String) { Box(Modifier.size(62.dp).clip(CircleShape).background(Purple), contentAlignment = Alignment.Center) { if (initial.isBlank()) Icon(Icons.Default.Person, null, tint = Color.White, modifier = Modifier.size(38.dp)) else Text(initial, Color.White, 30.sp, FontWeight.Bold) } }
