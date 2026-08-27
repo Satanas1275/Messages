@@ -39,14 +39,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
-import com.kyant.shapes.RoundedRectangle
 
 private val Black = Color(0xFF000000)
 private val Glass = Color(0xFF202020).copy(alpha = .84f)
@@ -73,7 +65,7 @@ fun LiquidMessagesApp() {
     var searchMode by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     var filterOpen by remember { mutableStateOf(false) }
-    val backdrop = rememberLayerBackdrop()
+    val backdrop = Unit
     val hasReadPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
     val hasSendPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
     val conversations by produceState(emptyList(), hasReadPermission, permissionVersion) {
@@ -93,7 +85,6 @@ fun LiquidMessagesApp() {
     MaterialTheme {
         Surface(Modifier.fillMaxSize(), color = Black) {
             Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(Color(0xFF292442), Black), radius = 1000f))) {
-                Box(Modifier.fillMaxSize().layerBackdrop(backdrop))
                 when {
                     selected != null -> ConversationScreen(selected!!, backdrop, onBack = { selected = null })
                     searchMode -> SearchScreen(query, { query = it }, { searchMode = false; query = "" }, backdrop)
@@ -143,7 +134,7 @@ private fun loadMessages(context: Context, address: String): List<SmsMessage> {
 private fun formatDate(time: Long): String = android.text.format.DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), android.text.format.DateUtils.DAY_IN_MILLIS).toString()
 
 @Composable
-private fun MessagesScreen(conversations: List<Conversation>, onSearch: () -> Unit, onFilter: () -> Unit, onConversation: (Conversation) -> Unit, backdrop: LayerBackdrop) {
+private fun MessagesScreen(conversations: List<Conversation>, onSearch: () -> Unit, onFilter: () -> Unit, onConversation: (Conversation) -> Unit, backdrop: Unit) {
     Column(Modifier.fillMaxSize().padding(top = 10.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             GlassButton("Modifier", {}, backdrop)
@@ -157,7 +148,7 @@ private fun MessagesScreen(conversations: List<Conversation>, onSearch: () -> Un
 }
 
 @Composable
-private fun ConversationScreen(conversation: Conversation, backdrop: LayerBackdrop, onBack: () -> Unit) {
+private fun ConversationScreen(conversation: Conversation, backdrop: Unit, onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var refresh by remember { mutableIntStateOf(0) }
     var text by remember { mutableStateOf("") }
@@ -191,10 +182,10 @@ private fun sendSms(context: Context, address: String, body: String) {
 
 @Composable private fun ConversationRow(c: Conversation, onClick: () -> Unit) { Column { Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(20.dp, 14.dp), verticalAlignment = Alignment.CenterVertically) { Avatar(c.initial); Spacer(Modifier.width(16.dp)); Column(Modifier.weight(1f)) { Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) { Text(c.name, Color.White, 18.sp, FontWeight.Bold); Text(c.date, Color.Gray, 15.sp) }; Text(c.preview, Color.LightGray, 16.sp, maxLines = 2) }; Text("›", Color.Gray, 34.sp) }; Box(Modifier.fillMaxWidth().padding(start = 88.dp, end = 20.dp).height(1.dp).background(Divider)) } }
 
-@Composable private fun SearchScreen(query: String, onQueryChange: (String) -> Unit, onClose: () -> Unit, backdrop: LayerBackdrop) { Column(Modifier.fillMaxSize()) { Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onClose) { Icon(Icons.Default.ArrowBack, null, tint = Color.White) }; Text("Recherche", Color.White, 26.sp, FontWeight.Bold) }; Spacer(Modifier.weight(1f)); SearchBar(query, onQueryChange, onClose = onClose, backdrop = backdrop) } }
-@Composable private fun SearchBar(query: String = "", onQueryChange: ((String) -> Unit)? = null, onSearch: (() -> Unit)? = null, onClose: (() -> Unit)? = null, backdrop: LayerBackdrop) { Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(18.dp, 14.dp), verticalAlignment = Alignment.CenterVertically) { GlassSurface(Modifier.weight(1f).height(62.dp), backdrop, RoundedCornerShape(34.dp)) { Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = { onSearch?.invoke() }) { Icon(Icons.Default.Search, null, tint = Color.White) }; if (onQueryChange != null) TextField(query, onQueryChange, singleLine = true, placeholder = { Text("Recherche", Color.Gray) }, modifier = Modifier.weight(1f), colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White)) else Text("Recherche", Color.Gray, modifier = Modifier.weight(1f)); Icon(Icons.Default.Mic, null, tint = Color.White) } }; Spacer(Modifier.width(10.dp)); GlassIconButton(if (onClose == null) Icons.Default.Search else Icons.Default.Close, { onClose?.invoke() }, backdrop) } }
-@Composable private fun GlassMenu(modifier: Modifier, title: String?, entries: List<Pair<androidx.compose.ui.graphics.vector.ImageVector, String>>, footer: String?, onDismiss: () -> Unit, backdrop: LayerBackdrop) { GlassSurface(modifier.width(340.dp), backdrop, RoundedCornerShape(34.dp)) { Column(Modifier.padding(24.dp)) { title?.let { Text(it, Color.White, 20.sp, FontWeight.Bold) }; entries.forEach { (icon, label) -> Row(Modifier.fillMaxWidth().clickable(onClick = onDismiss).padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = Color.White); Spacer(Modifier.width(20.dp)); Text(label, Color.White, 18.sp) } }; footer?.let { Text(it, Color.Gray, 15.sp, Modifier.padding(top = 12.dp)) } } } }
-@Composable private fun GlassSurface(modifier: Modifier, backdrop: LayerBackdrop, shape: Shape, content: @Composable () -> Unit) { Box(modifier.drawBackdrop(backdrop = backdrop, shape = { RoundedRectangle(34.dp.toPx()) }, effects = { vibrancy(); blur(8.dp.toPx()); lens(10.dp.toPx(), 18.dp.toPx()) }, onDrawSurface = { drawRect(Glass) }), contentAlignment = Alignment.Center) { content() } }
-@Composable private fun GlassButton(text: String, onClick: () -> Unit, backdrop: LayerBackdrop) { GlassSurface(Modifier.clip(RoundedCornerShape(28.dp)).clickable(onClick = onClick).padding(horizontal = 22.dp, vertical = 14.dp), backdrop, RoundedCornerShape(28.dp)) { Text(text, Color.White, 19.sp, FontWeight.Bold) } }
-@Composable private fun GlassIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit, backdrop: LayerBackdrop) { GlassSurface(Modifier.size(64.dp).clip(CircleShape).clickable(onClick = onClick), backdrop, CircleShape) { Icon(icon, null, tint = Color.White, modifier = Modifier.size(30.dp)) } }
+@Composable private fun SearchScreen(query: String, onQueryChange: (String) -> Unit, onClose: () -> Unit, backdrop: Unit) { Column(Modifier.fillMaxSize()) { Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onClose) { Icon(Icons.Default.ArrowBack, null, tint = Color.White) }; Text("Recherche", Color.White, 26.sp, FontWeight.Bold) }; Spacer(Modifier.weight(1f)); SearchBar(query, onQueryChange, onClose = onClose, backdrop = backdrop) } }
+@Composable private fun SearchBar(query: String = "", onQueryChange: ((String) -> Unit)? = null, onSearch: (() -> Unit)? = null, onClose: (() -> Unit)? = null, backdrop: Unit) { Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(18.dp, 14.dp), verticalAlignment = Alignment.CenterVertically) { GlassSurface(Modifier.weight(1f).height(62.dp), backdrop, RoundedCornerShape(34.dp)) { Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = { onSearch?.invoke() }) { Icon(Icons.Default.Search, null, tint = Color.White) }; if (onQueryChange != null) TextField(query, onQueryChange, singleLine = true, placeholder = { Text("Recherche", Color.Gray) }, modifier = Modifier.weight(1f), colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White)) else Text("Recherche", Color.Gray, modifier = Modifier.weight(1f)); Icon(Icons.Default.Mic, null, tint = Color.White) } }; Spacer(Modifier.width(10.dp)); GlassIconButton(if (onClose == null) Icons.Default.Search else Icons.Default.Close, { onClose?.invoke() }, backdrop) } }
+@Composable private fun GlassMenu(modifier: Modifier, title: String?, entries: List<Pair<androidx.compose.ui.graphics.vector.ImageVector, String>>, footer: String?, onDismiss: () -> Unit, backdrop: Unit) { GlassSurface(modifier.width(340.dp), backdrop, RoundedCornerShape(34.dp)) { Column(Modifier.padding(24.dp)) { title?.let { Text(it, Color.White, 20.sp, FontWeight.Bold) }; entries.forEach { (icon, label) -> Row(Modifier.fillMaxWidth().clickable(onClick = onDismiss).padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = Color.White); Spacer(Modifier.width(20.dp)); Text(label, Color.White, 18.sp) } }; footer?.let { Text(it, Color.Gray, 15.sp, Modifier.padding(top = 12.dp)) } } } }
+@Composable private fun GlassSurface(modifier: Modifier, backdrop: Unit, shape: Shape, content: @Composable () -> Unit) { Box(modifier.clip(shape).background(Glass), contentAlignment = Alignment.Center) { content() } }
+@Composable private fun GlassButton(text: String, onClick: () -> Unit, backdrop: Unit) { GlassSurface(Modifier.clip(RoundedCornerShape(28.dp)).clickable(onClick = onClick).padding(horizontal = 22.dp, vertical = 14.dp), backdrop, RoundedCornerShape(28.dp)) { Text(text, Color.White, 19.sp, FontWeight.Bold) } }
+@Composable private fun GlassIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit, backdrop: Unit) { GlassSurface(Modifier.size(64.dp).clip(CircleShape).clickable(onClick = onClick), backdrop, CircleShape) { Icon(icon, null, tint = Color.White, modifier = Modifier.size(30.dp)) } }
 @Composable private fun Avatar(initial: String) { Box(Modifier.size(62.dp).clip(CircleShape).background(Purple), contentAlignment = Alignment.Center) { if (initial.isBlank()) Icon(Icons.Default.Person, null, tint = Color.White, modifier = Modifier.size(38.dp)) else Text(initial, Color.White, 30.sp, FontWeight.Bold) } }
