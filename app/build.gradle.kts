@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.liquidmessages"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.liquidmessages"
@@ -39,6 +39,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("io.github.kyant0:backdrop-android:2.0.0-alpha03")
     constraints {
         implementation("androidx.compose.ui:ui:1.7.5")
         implementation("androidx.compose.foundation:foundation:1.7.5")
