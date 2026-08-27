@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    val composeBom = platform("androidx.compose:compose-bom:2024.11.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
     implementation("androidx.core:core-ktx:1.15.0")
@@ -30,6 +30,12 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("io.github.kyant0:backdrop:2.0.1")
+    implementation("io.github.kyant0:backdrop:1.3.0")
+    constraints {
+        implementation("androidx.compose.ui:ui:1.7.5")
+        implementation("androidx.compose.foundation:foundation:1.7.5")
+        implementation("androidx.compose.animation:animation:1.7.5")
+        implementation("androidx.compose.runtime:runtime:1.7.5")
+    }
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
