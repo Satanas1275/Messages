@@ -30,7 +30,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("io.github.kyant0:backdrop:1.3.0")
+    implementation("io.github.kyant0:backdrop:2.0.1")
     constraints {
         implementation("androidx.compose.ui:ui:1.7.5")
         implementation("androidx.compose.foundation:foundation:1.7.5")
@@ -38,4 +38,13 @@ dependencies {
         implementation("androidx.compose.runtime:runtime:1.7.5")
     }
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // Keep the transitive Compose stack aligned with the current Android plugin.
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "androidx.compose.ui" || requested.group == "androidx.compose.foundation" || requested.group == "androidx.compose.animation" || requested.group == "androidx.compose.runtime") {
+                useVersion("1.7.5")
+            }
+        }
+    }
 }
